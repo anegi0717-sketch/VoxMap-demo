@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="hi" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gulabo / VoxMap — 12-Screen Fully Interactive Mobile Experience</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Poppins, Inter, & Noto Sans Devanagari -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome 6.5 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gulabo: {
+              DEFAULT: '#6A1B9A',
+              royal: '#5E2B97',
+              deep: '#512086',
+              dark: '#4A148C',
+              light: '#F3E5F5',
+              tint: '#F8F5FF',
+              accent: '#FF7043',
+              goldBg: '#FDE8BB',
+              goldText: '#9A6500',
+              route: '#2563EB',
+              emerald: '#10B981'
+            }
+          },
+          fontFamily: {
+            sans: ['Poppins', 'Noto Sans Devanagari', 'Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Poppins', 'Noto Sans Devanagari', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Phone Chassis Bezel */
+    .chassis-shadow {
+      box-shadow: 
+        0 25px 70px -15px rgba(0, 0, 0, 0.9),
+        0 0 0 10px #110e1a,
+        0 0 0 12px #2d2640,
+        0 0 45px rgba(106, 27, 154, 0.4);
+    }
+
+    /* AMOLED Pulsing Circle for Screen 11 */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.92); opacity: 0.85; }
+      50% { transform: scale(1.08); opacity: 0.35; filter: blur(4px); }
+      100% { transform: scale(0.92); opacity: 0.85; }
+    }
+    .pulse-ring-anim {
+      animation: pulse-ring 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    .board-card {
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.4, 1);
+    }
+    .board-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 20px 40px -10px rgba(106, 27, 154, 0.35);
+    }
+
+    /* Active Back Key Indicator */
+    .back-btn-tap:active {
+      transform: scale(0.88);
+      background-color: rgba(106, 27, 154, 0.15);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-purple-600 selection:text-white">
+
+  <!-- ========================================================
+       TOP GLOBAL CONTROLS & DUAL-MODE HEADER
+  ========================================================= -->
+  <header class="w-full bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 py-3 flex flex-wrap items-center justify-between gap-3 z-40 sticky top-0">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-800 via-gulabo-deep to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-purple-900/60 ring-2 ring-purple-500/30">
+        <i class="fa-solid fa-location-dot text-lg"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-1.5">
+            Gulabo / VoxMap <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-900/70 text-purple-200 border border-purple-500/40">100% Interactive</span>
+          </h1>
+          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Back Stack Active
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-400 hidden sm:block">Full Native Feel • Uttarakhand & Rishikesh Live Tour Guide</p>
+      </div>
+    </div>
+
+    <!-- Mode Switcher Tabs & Controls -->
+    <div class="flex items-center gap-2 text-xs">
+      <div class="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex items-center gap-1">
+        <button onclick="setViewMode('phone')" id="btn-mode-phone" class="px-3.5 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 bg-gulabo text-white shadow">
+          <i class="fa-solid fa-mobile-screen"></i>
+          <span>Interactive Phone</span>
+        </button>
+        <button onclick="setViewMode('figma')" id="btn-mode-figma" class="px-3.5 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white">
+          <i class="fa-solid fa-table-cells-large"></i>
+          <span>Figma 12-Screen Grid</span>
+        </button>
+      </div>
+
+      <!-- Quick Screen Jump Selector -->
+      <select id="quick-screen-select" onchange="jumpToScreen(this.value)" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-2.5 py-1.5 text-xs outline-none focus:border-purple-500">
+        <option value="1">1. Onboarding (Kedarnath)</option>
+        <option value="2" selected>2. Home (Rishikesh)</option>
+        <option value="3">3. Interactive Map & POIs</option>
+        <option value="4">4. Gulabo AI Chat Assistant</option>
+        <option value="5">5. Place Detail (Triveni Ghat)</option>
+        <option value="6">6. Live Quizzes & Coins</option>
+        <option value="7">7. Offline Map Packs</option>
+        <option value="8">8. Stays & Guides Marketplace</option>
+        <option value="9">9. Partner Plus (For Business)</option>
+        <option value="10">10. Cafe Detail (Little Buddha)</option>
+        <option value="11">11. AMOLED Voice Audio Guide</option>
+        <option value="12">12. User Profile & Badges</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Interactive Toast Notification Container -->
+  <div id="toast-container" class="fixed top-16 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Global Modal: Booking Checkout -->
+  <div id="booking-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white text-slate-800 rounded-3xl w-full max-w-sm p-5 shadow-2xl relative border border-purple-200 animate-in fade-in zoom-in duration-200">
+      <button onclick="closeModal('booking-modal')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div class="w-12 h-12 rounded-2xl bg-purple-100 text-gulabo flex items-center justify-center text-xl mb-3">
+        <i class="fa-solid fa-hotel"></i>
+      </div>
+      <h3 id="booking-modal-title" class="text-base font-bold text-slate-900">Ganga View Boutique Stay</h3>
+      <p id="booking-modal-price" class="text-xs text-gulabo font-semibold mt-0.5">₹2,400 / रात • 2 यात्री</p>
+
+      <div class="mt-4 space-y-2.5 text-xs">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-500 uppercase">तारीख चुनें (Check-in)</label>
+          <input type="date" value="2026-05-24" class="w-full mt-1 p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-medium outline-none" />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-500 uppercase">यात्री का नाम</label>
+          <input type="text" value="अमित वर्मा" class="w-full mt-1 p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-medium outline-none" />
+        </div>
+      </div>
+
+      <div class="mt-5 flex gap-2">
+        <button onclick="confirmBooking()" class="flex-1 py-3 rounded-xl bg-gulabo text-white font-bold text-xs shadow-md shadow-purple-900/30">
+          बुकिंग कन्फर्म करें (Instant UPI)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Modal: Business Listing Lead Form -->
+  <div id="business-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white text-slate-800 rounded-3xl w-full max-w-sm p-5 shadow-2xl relative border border-purple-200">
+      <button onclick="closeModal('business-modal')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl mb-3">
+        <i class="fa-solid fa-store"></i>
+      </div>
+      <h3 class="text-base font-bold text-slate-900">List Your Business on VoxMap</h3>
+      <p class="text-xs text-slate-500 mt-0.5">हजारों स्थानीय पर्यटकों तक अपने होटल, कैफे या टैक्सी सर्विस को पहुंचाएं।</p>
+
+      <div class="mt-4 space-y-2.5 text-xs">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-500 uppercase">बिजनेस का नाम</label>
+          <input id="biz-name" type="text" placeholder="e.g. Mountain Cafe & Homestay" class="w-full mt-1 p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 outline-none" />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-500 uppercase">शहर / स्थान</label>
+          <input id="biz-city" type="text" placeholder="e.g. Rishikesh, Tapovan" class="w-full mt-1 p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 outline-none" />
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <button onclick="submitBusinessListing()" class="w-full py-3 rounded-xl bg-gulabo text-white font-bold text-xs shadow-md">
+          पार्टनरशिप आवेदन भेजें &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       VIEW MODE 1: INTERACTIVE PHONE SIMULATOR
+  ========================================================= -->
+  <main id="view-phone" class="flex-1 flex items-center justify-center p-2 sm:p-4 lg:p-6 overflow-y-auto">
+    <div id="phone-container" class="transition-all duration-300">
+      <div id="phone-chassis" class="chassis-shadow relative w-[385px] max-w-[96vw] h-[815px] rounded-[52px] bg-slate-950 overflow-hidden flex flex-col border-[3px] border-slate-700/60">
+
+        <!-- Top Hardware Status Bar & Dynamic Island -->
+        <div class="h-11 px-7 pt-2 flex items-center justify-between text-xs font-semibold z-40 bg-white select-none border-b border-slate-100 text-slate-800 transition-colors duration-200" id="phone-top-bar">
+          <span id="phone-clock" class="text-[12px] font-bold">9:41</span>
+          
+          <!-- Dynamic Island / Punch Hole (Clickable for quick alert) -->
+          <div onclick="showAppNotification('VoxMap Dynamic Island: GPS Active')" class="h-5 w-24 bg-black rounded-full flex items-center justify-center gap-1.5 px-2 cursor-pointer shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-slate-800"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-purple-500 animate-ping"></span>
+          </div>
+
+          <div class="flex items-center gap-1.5 text-[11px]">
+            <i class="fa-solid fa-signal text-[10px]"></i>
+            <i class="fa-solid fa-wifi text-[10px]"></i>
+            <i class="fa-solid fa-battery-full text-xs text-slate-700"></i>
+          </div>
+        </div>
+
+        <!-- Inner Screen Viewport -->
+        <div id="app-viewport" class="flex-1 overflow-hidden relative bg-[#F8F5FF] text-slate-800 flex flex-col">
+          
+          <!-- SCREEN 1: SPLASH / ONBOARDING -->
+          <div id="s-1" class="screen-view h-full flex flex-col relative text-white bg-slate-950 hidden">
+            <img src="https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=700&q=80" alt="Kedarnath" class="absolute inset-0 w-full h-full object-cover opacity-80" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+            
+            <div class="relative z-10 flex flex-col h-full justify-between p-6 pb-12">
+              <div class="pt-8 text-center">
+                <div class="w-16 h-16 rounded-3xl bg-white/15 backdrop-blur-md mx-auto flex items-center justify-center border border-white/30 shadow-xl mb-3">
+                  <i class="fa-solid fa-location-dot text-white text-2xl"></i>
+                </div>
+                <h2 class="text-3xl font-extrabold tracking-tight">Gulabo</h2>
+                <p class="text-xs text-purple-200 uppercase tracking-widest mt-0.5">Your AI Local Guide</p>
+              </div>
+
+              <div class="text-center">
+                <h3 class="text-2xl font-bold leading-snug mb-2 font-['Noto_Sans_Devanagari']">
+                  यहाँ ज्ञान है, यहाँ शांति है...<br />शुरू करें अपनी यात्रा।
+                </h3>
+                <p class="text-xs text-slate-300 mb-6">Discover. Learn. Explore Devbhoomi.</p>
+
+                <button onclick="navigateToScreen(2)" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-700 to-gulabo-deep hover:from-purple-600 hover:to-purple-800 text-white font-bold text-sm shadow-xl shadow-purple-950 transition active:scale-95">
+                  Get Started / शुरू करें &rarr;
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- SCREEN 2: HOME (RISHIKESH & ASK GULABO) -->
+          <div id="s-2" class="screen-view h-full flex flex-col overflow-y-auto no-scrollbar pb-20">
+            <!-- Top Greeting & Weather Pill -->
+            <div class="p-4 bg-white border-b border-purple-100 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <button onclick="navigateToScreen(12)" class="text-slate-600 text-sm hover:text-purple-700">
+                  <i class="fa-solid fa-bars"></i>
+                </button>
+                <div onclick="navigateToScreen(3)" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 border border-purple-200 cursor-pointer hover:bg-purple-100/60 transition">
+                  <i class="fa-solid fa-location-dot text-gulabo text-xs"></i>
+                  <span class="text-xs font-bold text-purple-950">Rishikesh, Uttarakhand</span>
+                  <i class="fa-solid fa-chevron-down text-[9px] text-purple-600 ml-0.5"></i>
+                </div>
+              </div>
+              <button onclick="showAppNotification('मौसम: 24°C, सुहावना और साफ़ आसमान')" class="flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 hover:bg-amber-100 transition">
+                <i class="fa-solid fa-sun"></i> 24°C
+              </button>
+            </div>
+
+            <!-- Ask Gulabo Voice AI Banner -->
+            <div class="m-4 p-4 rounded-3xl bg-gradient-to-r from-[#512086] via-[#6A1B9A] to-[#7B1FA2] text-white shadow-lg relative overflow-hidden">
+              <div class="relative z-10 text-center">
+                <h3 class="text-sm font-bold mb-1">Ask your AI Guide</h3>
+                <p class="text-[11px] text-purple-200 mb-3">पूछें कुछ भी... मैं हमेशा साथ हूँ</p>
+                <button onclick="navigateToScreen(4)" class="w-14 h-14 rounded-full bg-white text-gulabo shadow-xl mx-auto flex items-center justify-center text-xl transition active:scale-90 hover:scale-105">
+                  <i class="fa-solid fa-microphone"></i>
+                </button>
+              </div>
+              <div class="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-white/10 pointer-events-none"></div>
+            </div>
+
+            <!-- Explore Nearby Category Circles -->
+            <div class="px-4 mb-3">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="text-xs font-bold text-slate-900">Explore Nearby</h4>
+                <span onclick="navigateToScreen(3)" class="text-[10px] font-bold text-gulabo cursor-pointer hover:underline">See all</span>
+              </div>
+              <div class="grid grid-cols-5 gap-2 text-center">
+                <div onclick="navigateToScreen(3); showAppNotification('श्रेणी: मंदिर व तीर्थ स्थल')" class="flex flex-col items-center gap-1 cursor-pointer group">
+                  <div class="w-12 h-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center text-base shadow-sm group-hover:scale-105 transition">
+                    🛕
+                  </div>
+                  <span class="text-[10px] font-semibold text-slate-700">Temples</span>
+                </div>
+                <div onclick="navigateToScreen(3); showAppNotification('श्रेणी: व्यू पॉइंट व हिल्स')" class="flex flex-col items-center gap-1 cursor-pointer group">
+                  <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-base shadow-sm group-hover:scale-105 transition">
+                    🏔️
+                  </div>
+                  <span class="text-[10px] font-semibold text-slate-700">Viewpoint</span>
+                </div>
+                <div onclick="navigateToScreen(3); showAppNotification('श्रेणी: वॉटरफॉल्स व रिवर')" class="flex flex-col items-center gap-1 cursor-pointer group">
+                  <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-base shadow-sm group-hover:scale-105 transition">
+                    🌊
+                  </div>
+                  <span class="text-[10px] font-semibold text-slate-700">Waterfalls</span>
+                </div>
+                <div onclick="navigateToScreen(10)" class="flex flex-col items-center gap-1 cursor-pointer group">
+                  <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-base shadow-sm group-hover:scale-105 transition">
+                    ☕
+                  </div>
+                  <span class="text-[10px] font-semibold text-slate-700">Cafes</span>
+                </div>
+                <div onclick="navigateToScreen(8)" class="flex flex-col items-center gap-1 cursor-pointer group">
+                  <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-base shadow-sm group-hover:scale-105 transition">
+                    🏡
+                  </div>
+                  <span class="text-[10px] font-semibold text-slate-700">Hotels</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Popular Places Cards -->
+            <div class="px-4 mb-3">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="text-xs font-bold text-slate-900">Popular Places</h4>
+                <span onclick="navigateToScreen(3)" class="text-[10px] font-bold text-gulabo cursor-pointer hover:underline">See all &rarr;</span>
+              </div>
+              <div class="flex gap-2.5 overflow-x-auto no-scrollbar pb-1">
+                <!-- Triveni Ghat Card -->
+                <div onclick="navigateToScreen(5)" class="w-32 flex-shrink-0 bg-white rounded-2xl p-2 shadow-sm border border-slate-100 cursor-pointer hover:border-purple-300 transition">
+                  <img src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=300&q=80" alt="Triveni Ghat" class="w-full h-20 rounded-xl object-cover mb-1.5" />
+                  <h5 class="text-[11px] font-bold text-slate-900 truncate">Triveni Ghat</h5>
+                  <p class="text-[9px] text-slate-500">800 m</p>
+                </div>
+                <!-- Ram Jhula Card -->
+                <div onclick="navigateToScreen(5)" class="w-32 flex-shrink-0 bg-white rounded-2xl p-2 shadow-sm border border-slate-100 cursor-pointer hover:border-purple-300 transition">
+                  <img src="https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=300&q=80" alt="Ram Jhula" class="w-full h-20 rounded-xl object-cover mb-1.5" />
+                  <h5 class="text-[11px] font-bold text-slate-900 truncate">Ram Jhula</h5>
+                  <p class="text-[9px] text-slate-500">2.1 km</p>
+                </div>
+                <!-- Neelkanth Mahadev -->
+                <div onclick="navigateToScreen(5)" class="w-32 flex-shrink-0 bg-white rounded-2xl p-2 shadow-sm border border-slate-100 cursor-pointer hover:border-purple-300 transition">
+                  <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=300&q=80" alt="Neelkanth" class="w-full h-20 rounded-xl object-cover mb-1.5" />
+                  <h5 class="text-[11px] font-bold text-slate-900 truncate">Neelkanth Mahadev</h5>
+                  <p class="text-[9px] text-slate-500">12 km</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Learn & Play Quiz Banner -->
+            <div class="px-4">
+              <div onclick="navigateToScreen(6)" class="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-between cursor-pointer hover:bg-indigo-100/70 transition">
+                <div>
+                  <span class="text-[9px] font-extrabold text-indigo-700 bg-white px-2 py-0.5 rounded-full border border-indigo-200 uppercase">Learn & Play</span>
+                  <h5 class="text-xs font-bold text-indigo-950 mt-1">उत्तराखंड दैनिक ज्ञान क्विज़</h5>
+                  <p class="text-[10px] text-indigo-800">सवालों के जवाब दें और अर्जित करें कॉइन्स!</p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center text-xl text-indigo-700">
+                  🎓
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SCREEN 3: MAPS SCREEN (RIVER & POI PINS) -->
+          <div id="s-3" class="screen-view h-full flex flex-col relative hidden">
+            <!-- Simulated Stylized Map Canvas with River Ganga -->
+            <div class="absolute inset-0 bg-[#E8F1F5] overflow-hidden">
+              <svg class="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 120 0 Q 220 200 170 420 T 260 800" fill="none" stroke="#90CAF9" stroke-width="64" />
+                <path d="M 120 0 Q 220 200 170 420 T 260 800" fill="none" stroke="#64B5F6" stroke-width="48" opacity="0.6" />
+                <!-- Bridges -->
+                <line x1="165" y1="210" x2="225" y2="195" stroke="#795548" stroke-width="5" stroke-dasharray="2,2" />
+                <line x1="180" y1="360" x2="245" y2="340" stroke="#795548" stroke-width="5" stroke-dasharray="2,2" />
+              </svg>
+
+              <!-- Map Road Lines -->
+              <div class="absolute top-20 left-4 right-10 h-1 bg-white/70 rotate-12"></div>
+              <div class="absolute bottom-40 left-0 right-0 h-1.5 bg-white/80 -rotate-6"></div>
+
+              <!-- Interactive POI Markers -->
+              <!-- 1. Parmarth Niketan -->
+              <div onclick="selectMapSpot('Parmarth Niketan', '2.8 km', 'गंगा आरती व योग आश्रम')" class="absolute top-36 left-44 flex flex-col items-center cursor-pointer transform hover:scale-110 transition">
+                <div class="px-2 py-0.5 rounded-md bg-white text-[9px] font-bold text-slate-800 shadow mb-1 border border-purple-200">Parmarth Niketan</div>
+                <div class="w-8 h-8 rounded-full bg-purple-700 text-white flex items-center justify-center text-xs shadow-lg border-2 border-white">
+                  🛕
+                </div>
+              </div>
+
+              <!-- 2. Ram Jhula -->
+              <div onclick="selectMapSpot('Ram Jhula', '2.1 km', 'प्रसिद्ध झूला पुल')" class="absolute top-52 right-12 flex flex-col items-center cursor-pointer transform hover:scale-110 transition">
+                <div class="px-2 py-0.5 rounded-md bg-white text-[9px] font-bold text-slate-800 shadow mb-1 border border-purple-200">Ram Jhula</div>
+                <div class="w-8 h-8 rounded-full bg-purple-700 text-white flex items-center justify-center text-xs shadow-lg border-2 border-white">
+                  🌉
+                </div>
+              </div>
+
+              <!-- 3. Laxman Jhula -->
+              <div onclick="selectMapSpot('Laxman Jhula', '3.9 km', 'ऐतिहासिक सस्पेंशन ब्रिज')" class="absolute bottom-60 right-16 flex flex-col items-center cursor-pointer transform hover:scale-110 transition">
+                <div class="px-2 py-0.5 rounded-md bg-white text-[9px] font-bold text-slate-800 shadow mb-1 border border-purple-200">Laxman Jhula</div>
+                <div class="w-8 h-8 rounded-full bg-purple-700 text-white flex items-center justify-center text-xs shadow-lg border-2 border-white">
+                  🌉
+                </div>
+              </div>
+
+              <!-- 4. Triveni Ghat (Selected Active Pin) -->
+              <div onclick="selectMapSpot('Triveni Ghat', '800 m', 'महा आरती स्थल')" class="absolute bottom-44 left-16 flex flex-col items-center cursor-pointer transform scale-110 transition">
+                <div class="w-8 h-8 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs shadow-xl border-2 border-white animate-bounce">
+                  📍
+                </div>
+              </div>
+
+              <!-- User Current Location Blue Dot -->
+              <div class="absolute top-72 left-32 flex items-center justify-center">
+                <span class="w-7 h-7 rounded-full bg-blue-500/30 animate-ping absolute"></span>
+                <span class="w-3.5 h-3.5 rounded-full bg-blue-600 border-2 border-white shadow"></span>
+              </div>
+            </div>
+
+            <!-- Top Search Pill with Back Button on Map -->
+            <div class="relative z-10 p-4 flex items-center gap-2">
+              <button onclick="navigateBack()" class="back-btn-tap w-9 h-9 rounded-2xl bg-white shadow-md text-slate-700 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <div class="flex-1 bg-white/95 backdrop-blur-md rounded-2xl p-2.5 shadow-md border border-slate-200 flex items-center gap-2">
+                <i class="fa-solid fa-magnifying-glass text-gulabo text-xs ml-1"></i>
+                <input id="map-search-input" type="text" placeholder="ऋषिकेश में स्थान खोजें..." class="w-full text-xs text-slate-800 bg-transparent outline-none font-medium" />
+                <button onclick="filterMapPOI()" class="w-7 h-7 rounded-xl bg-purple-50 text-gulabo flex items-center justify-center text-xs">
+                  <i class="fa-solid fa-sliders"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Bottom Floating Preview Card for Triveni Ghat -->
+            <div class="absolute bottom-20 left-4 right-4 z-20 bg-white rounded-3xl p-3 shadow-2xl border border-purple-100 flex items-center justify-between gap-3">
+              <div onclick="navigateToScreen(5)" class="flex items-center gap-2.5 cursor-pointer">
+                <img src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=150&q=80" alt="Triveni" class="w-14 h-14 rounded-2xl object-cover" />
+                <div>
+                  <h4 id="map-card-title" class="text-xs font-bold text-slate-900 leading-tight">Triveni Ghat</h4>
+                  <p id="map-card-dist" class="text-[10px] text-slate-500">800 m away • घाट व महाआरती</p>
+                  <div class="flex items-center gap-1 text-[10px] text-amber-500 font-bold mt-0.5">
+                    <i class="fa-solid fa-star text-[9px]"></i> 4.8 (820)
+                  </div>
+                </div>
+              </div>
+              <button onclick="startNavigationToCurrentPOI()" class="w-10 h-10 rounded-2xl bg-gulabo text-white flex items-center justify-center text-sm shadow-md active:scale-95 transition" title="Start Live Route">
+                <i class="fa-solid fa-diamond-turn-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- SCREEN 4: AI GUIDE CHAT (GULABO CONVERSATION) -->
+          <div id="s-4" class="screen-view h-full flex flex-col bg-white hidden">
+            <!-- Chat Top Header with Back Button -->
+            <div class="p-3.5 border-b border-purple-100 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <button onclick="navigateBack()" class="back-btn-tap w-8 h-8 rounded-full bg-purple-50 text-gulabo flex items-center justify-center text-xs">
+                  <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div class="w-8 h-8 rounded-full bg-gulabo text-white flex items-center justify-center text-sm font-bold shadow">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-900">Gulabo AI Guide</h4>
+                  <p class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> ऑनलाइन • हिंदी / English
+                  </p>
+                </div>
+              </div>
+              <button onclick="speakDemoHindi()" class="w-8 h-8 rounded-full bg-purple-50 text-gulabo flex items-center justify-center text-xs" title="Listen Audio Voice">
+                <i class="fa-solid fa-volume-high"></i>
+              </button>
+            </div>
+
+            <!-- Messages Stream -->
+            <div id="chat-messages-container" class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-3 pb-28">
+              <!-- User Question 1 -->
+              <div class="flex justify-end">
+                <div class="bg-gradient-to-r from-purple-700 to-gulabo text-white p-3 rounded-2xl rounded-tr-none text-xs max-w-[85%] shadow-sm">
+                  त्रिवेणी घाट का इतिहास क्या है?
+                </div>
+              </div>
+
+              <!-- Gulabo Reply 1 -->
+              <div class="flex items-start gap-2">
+                <div class="w-7 h-7 rounded-full bg-purple-100 text-gulabo flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                  🌺
+                </div>
+                <div class="bg-purple-50 border border-purple-100 p-3 rounded-2xl rounded-tl-none text-xs text-slate-800 max-w-[85%] leading-relaxed">
+                  त्रिवेणी घाट ऋषिकेश का सबसे पावन और बड़ा घाट है। यहाँ गंगा, यमुना और सरस्वती नदियों का संगम माना जाता है। मान्यता है कि यहाँ स्नान करने से सारे पाप धुल जाते हैं।
+                  <div class="mt-2 pt-1 border-t border-purple-200/50 flex items-center justify-between">
+                    <button onclick="speakDemoHindi()" class="text-[10px] font-bold text-gulabo flex items-center gap-1">
+                      <i class="fa-solid fa-headphones"></i> ऑडियो सुनें (42s)
+                    </button>
+                    <span class="text-[9px] text-slate-400">10:42 AM</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- User Question 2 -->
+              <div class="flex justify-end">
+                <div class="bg-gradient-to-r from-purple-700 to-gulabo text-white p-3 rounded-2xl rounded-tr-none text-xs max-w-[85%] shadow-sm">
+                  त्रिवेणी घाट पर आरती कब होती है?
+                </div>
+              </div>
+
+              <!-- Gulabo Reply 2 -->
+              <div class="flex items-start gap-2">
+                <div class="w-7 h-7 rounded-full bg-purple-100 text-gulabo flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                  🌺
+                </div>
+                <div class="bg-purple-50 border border-purple-100 p-3 rounded-2xl rounded-tl-none text-xs text-slate-800 max-w-[85%] leading-relaxed">
+                  त्रिवेणी घाट पर महा आरती प्रतिदिन शाम 6:00 बजे से 7:00 बजे तक होती है। मंत्रोच्चार, घंटियों और दीपदान का यह दृश्य अत्यंत मनमोहक होता है।
+                  <div class="mt-2 flex gap-1.5">
+                    <button onclick="navigateToScreen(5)" class="px-2.5 py-1 rounded-xl bg-gulabo text-white text-[10px] font-bold">
+                      घाट विवरण देखें &rarr;
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Preset Quick Suggestion Chips -->
+            <div class="absolute bottom-24 left-0 right-0 px-4 flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+              <span onclick="sendQuickPrompt('ऋषिकेश में टॉप 3 कैफे कौन से हैं?')" class="px-2.5 py-1 rounded-full bg-white border border-purple-200 text-slate-700 text-[10px] font-medium whitespace-nowrap shadow-sm cursor-pointer hover:bg-purple-50">
+                ☕ टॉप कैफे कौन से हैं?
+              </span>
+              <span onclick="sendQuickPrompt('नीलकंठ महादेव का रास्ता कितना दूर है?')" class="px-2.5 py-1 rounded-full bg-white border border-purple-200 text-slate-700 text-[10px] font-medium whitespace-nowrap shadow-sm cursor-pointer hover:bg-purple-50">
+                🛕 नीलकंठ महादेव दूरी?
+              </span>
+              <span onclick="sendQuickPrompt('आज शाम की आरती का समय क्या है?')" class="px-2.5 py-1 rounded-full bg-white border border-purple-200 text-slate-700 text-[10px] font-medium whitespace-nowrap shadow-sm cursor-pointer hover:bg-purple-50">
+                🪔 आरती का समय?
+              </span>
+            </div>
+
+            <!-- Bottom Chat Input Bar -->
+            <div class="absolute bottom-14 left-0 right-0 p-2.5 bg-white border-t border-purple-100 flex items-center gap-2">
+              <input type="text" id="chat-input-field" placeholder="गुलाबो से पूछें..." class="flex-1 text-xs bg-purple-50/60 rounded-2xl px-3 py-2.5 outline-none border border-purple-100" onkeydown="if(event.key === 'Enter') sendUserMessage()" />
+              <button onclick="sendUserMessage()" class="w-9 h-9 rounded-full bg-gulabo text-white flex items-center justify-center text-sm shadow">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+              <button onclick="speakDemoHindi()" class="w-9 h-9 rounded-full bg-purple-100 text-gulabo flex items-center justify-center text-sm">
+                <i class="fa-solid fa-microphone"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- SCREEN 5: PLACE DETAIL (TRIVENI GHAT) -->
+          <div id="s-5" class="screen-view h-full flex flex-col overflow-y-auto no-scrollbar pb-20 bg-white hidden">
+            <!-- Hero Image Banner with Back Button -->
+            <div class="relative h-56">
+              <img src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=700&q=80" alt="Triveni" class="w-full h-full object-cover" />
+              <div class="absolute top-4 left-4 right-4 flex items-center justify-between">
+                <button onclick="navigateBack()" class="back-btn-tap w-9 h-9 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center text-xs shadow-md">
+                  <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                  <button id="bookmark-btn" onclick="toggleBookmark()" class="w-9 h-9 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center text-xs">
+                    <i class="fa-regular fa-heart"></i>
+                  </button>
+                  <button onclick="shareCurrentPlace('Triveni Ghat')" class="w-9 h-9 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-share-nodes"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="p-4 -mt-4 bg-white rounded-t-3xl relative z-10">
+              <div class="flex items-center justify-between mb-1">
+                <h3 class="text-base font-bold text-slate-900">Triveni Ghat (त्रिवेणी घाट)</h3>
+                <span class="text-xs font-bold text-amber-500 flex items-center gap-1">
+                  <i class="fa-solid fa-star"></i> 4.8 (820)
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-500 mb-2">Mayakund, Rishikesh, Uttarakhand • 800 m away</p>
+
+              <!-- Tags -->
+              <div class="flex gap-1.5 mb-3">
+                <span class="px-2 py-0.5 rounded-full bg-purple-100 text-gulabo text-[10px] font-bold">धार्मिक स्थल</span>
+                <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">महा आरती</span>
+                <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-bold">पवित्र स्नान</span>
+              </div>
+
+              <!-- Description -->
+              <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                त्रिवेणी घाट ऋषिकेश का सबसे बड़ा और प्रमुख घाट है। यहाँ तीन पवित्र नदियों - गंगा, यमुना और सरस्वती का संगम माना जाता है। शाम को होने वाली भव्य गंगा आरती अत्यंत विख्यात है।
+              </p>
+
+              <!-- Timing Card -->
+              <div class="p-3 rounded-2xl bg-purple-50/70 border border-purple-100 mb-4 flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] text-slate-500 font-semibold block">दर्शन व स्नान समय:</span>
+                  <span class="text-xs font-bold text-purple-950">सुबह 5:00 AM - रात्रि 9:00 PM</span>
+                </div>
+                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-lg">खुला है</span>
+              </div>
+
+              <!-- Ask AI Prompt Chips -->
+              <div class="mb-4">
+                <span class="text-[10px] font-bold text-slate-700 block mb-1.5">गुलाबो से पूछें:</span>
+                <div class="flex flex-wrap gap-1.5">
+                  <span onclick="navigateToScreen(4); sendQuickPrompt('त्रिवेणी घाट की शाम की आरती का समय क्या है?')" class="px-2.5 py-1 rounded-full bg-slate-100 text-[10px] text-slate-700 cursor-pointer hover:bg-purple-100">आरती का सही समय क्या है?</span>
+                  <span onclick="navigateToScreen(8)" class="px-2.5 py-1 rounded-full bg-slate-100 text-[10px] text-slate-700 cursor-pointer hover:bg-purple-100">आस-पास के होटल</span>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex gap-2">
+                <button onclick="navigateToScreen(3); startNavigationToCurrentPOI()" class="flex-1 py-3 rounded-2xl bg-gulabo text-white font-bold text-xs shadow-md shadow-purple-950 flex items-center justify-center gap-1.5">
+                  <i class="fa-solid fa-location-arrow"></i> दिशा-निर्देश देखें
+                </button>
+                <button onclick="navigateToScreen(11)" class="flex-1 py-3 rounded-2xl bg-purple-100 text-gulabo font-bold text-xs flex items-center justify-center gap-1.5">
+                  <i class="fa-solid fa-headphones"></i> ऑडियो गाइड सुनें
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- SCREEN 6: QUIZZES (LEARN & EARN COINS) -->
+          <div id="s-6" class="screen-view h-full flex flex-col overflow-y-auto no-scrollbar pb-20 p-4 hidden">
+            <!-- Header with Back Button -->
+            <div class="flex items-center gap-2 mb-3">
+              <button onclick="navigateBack()" class="back-btn-tap w-8 h-8 rounded-full bg-white text-slate-700 shadow-sm flex items-center justify-center text-xs">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <h3 class="text-xs font-bold text-slate-800">Uttarakhand Quiz Master</h3>
+            </div>
+
+            <!-- Header Banner -->
+            <div class="p-4 rounded-3xl bg-gradient-to-r from-indigo-800 to-purple-800 text-white mb-4 relative overflow-hidden shadow-lg">
+              <span class="text-[9px] font-extrabold bg-amber-400 text-purple-950 px-2 py-0.5 rounded-full uppercase">Quiz Master</span>
+              <h3 class="text-base font-bold mt-1">उत्तराखंड दैनिक ज्ञान क्विज़</h3>
+              <p class="text-[11px] text-purple-200">सवालों के सही उत्तर दें और जीतें 🪙 कॉइन्स!</p>
+              <div class="absolute right-3 top-3 text-4xl opacity-20">🏆</div>
+            </div>
+
+            <!-- Interactive Live Question Card -->
+            <div class="bg-white rounded-2xl p-4 border border-purple-100 shadow-sm mb-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md">सवाल 1 / 5</span>
+                <span id="quiz-user-coins" class="text-xs font-extrabold text-amber-500">🪙 2,450 Coins</span>
+              </div>
+              <h4 class="text-xs font-bold text-slate-900 mb-2.5">
+                ऋषिकेश में किन तीन पवित्र नदियों का संगम त्रिवेणी घाट पर माना जाता है?
+              </h4>
+              
+              <!-- Clickable Options with Instant Feedback -->
+              <div class="space-y-1.5" id="quiz-options-group">
+                <button onclick="answerQuiz(this, true)" class="w-full text-left p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-purple-300 transition">
+                  A) गंगा, यमुना और सरस्वती
+                </button>
+                <button onclick="answerQuiz(this, false)" class="w-full text-left p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-purple-300 transition">
+                  B) अलकनंदा और भागीरथी
+                </button>
+                <button onclick="answerQuiz(this, false)" class="w-full text-left p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 hover:border-purple-300 transition">
+                  C) मंदाकिनी और पिंडर
+                </button>
+              </div>
+            </div>
+
+            <!-- Categories Grid -->
+            <h5 class="text-xs font-bold text-slate-900 mb-2">Explore Categories</h5>
+            <div class="grid grid-cols-2 gap-2">
+              <div onclick="showAppNotification('Uttarakhand GK कैटेगरी शुरू हो रही है...')" class="p-3 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center gap-2.5 cursor-pointer hover:border-purple-300">
+                <span class="text-2xl">🌲</span>
+                <div>
+                  <h6 class="text-xs font-bold text-slate-900">Uttarakhand GK</h6>
+                  <p class="text-[9px] text-slate-400">50+ Quizzes</p>
+                </div>
+              </div>
+              <div onclick="showAppNotification('History Quizzes लोड हो रहे हैं...')" class="p-3 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center gap-2.5 cursor-pointer hover:border-purple-300">
+                <span class="text-2xl">📜</span>
+                <div>
+                  <h6 class="text-xs font-bold text-slate-900">History</h6>
+                  <p class="text-[9px] text-slate-400">30+ Quizzes</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SCREEN 7: OFFLINE PACK (DOWNLOAD MAPS) -->
+          <div id="s-7" class="screen-view h-full flex flex-col overflow-y-auto no-scrollbar pb-20 p-4 hidden">
+            <!-- Header with Back Button -->
+            <div class="flex items-center gap-2 mb-3">
+              <button onclick="navigateBack()" class="back-btn-tap w-8 h-8 rounded-full bg-white text-slate-700 shadow-sm flex items-center justify-center text-xs">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <h3 class="text-xs font-bold text-slate-800">Offline Travel Packs</h3>
+            </div>
+
+            <!-- Offline Pack Banner -->
+            <div class="p-4 rounded-3xl bg-gradient-to-r from-teal-700 to-emerald-800 text-white mb-4 relative shadow-lg">
+              <h3 class="text-sm font-bold">इंटरनेट के बिना भी घूमें!</h3>
+              <p class="text-[11px] text-teal-100 mt-0.5">Offline Pack: GPS Maps, Audio Guides & Emergency Info.</p>
+            </div>
+
+            <!-- Downloadable Packs List -->
+            <div class="space-y-2.5">
+              <!-- Pack 1: Rishikesh -->
+              <div class="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-sm font-bold">
+                    📍
+                  </div>
+                  <div>
+                    <h5 class="text-xs font-bold text-slate-900">Rishikesh Pack</h5>
+                    <p class="text-[9px] text-slate-500">Maps, POIs, Audio • 85 MB</p>
+                  </div>
+                </div>
+                <button id="pack-btn-1" onclick="downloadOfflinePack(1, 'Rishikesh Pack')" class="px-3 py-1.5 rounded-full bg-purple-50 text-gulabo text-xs font-bold flex items-center gap-1 hover:bg-purple-100">
+                  <i class="fa-solid fa-download"></i> Download
+                </button>
+              </div>
+
+              <!-- Pack 2: Kedarnath -->
+              <div class="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-bold">
+                    🏔️
+                  </div>
+                  <div>
+                    <h5 class="text-xs font-bold text-slate-900">Kedarnath Yatra Pack</h5>
+                    <p class="text-[9px] text-slate-500">Trail Maps, High-Alt Audio • 120 MB</p>
+                  </div>
+                </div>
+                <button id="pack-btn-2" onclick="downloadOfflinePack(2, 'Kedarnath Yatra Pack')" class="px-3 py-1.5 rounded-full bg-purple-50 text-gulabo text-xs font-bold flex items-center gap-1 hover:bg-purple-100">
+                  <i class="fa-solid fa-download"></i> Download
+                </button>
+              </div>
+
+              <!-- Pack 3: Nainital -->
+              <div class="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold">
+                    ⛵
+                  </div>
+                  <div>
+                    <h5 class="text-xs font-bold text-slate-900">Nainital Lakes Pack</h5>
+                    <p class="text-[9px] text-slate-500">Lake Circuit & Viewpoints • 94 MB</p>
+                  </div>
+                </div>
+                <button id="pack-btn-3" onclick="downloadOfflinePack(3, 'Nainital Lakes Pack')" class="px-3 py-1.5 rounded-full bg-purple-50 text-gulabo text-xs font-bold flex items-center gap-1 hover:bg-purple-100">
+                  <i class="fa-solid fa-download"></i> Download
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- SCREEN 8: BOOKINGS & STAYS -->
+          <div id="s-8" class="screen-view h-full flex flex-col overflow-y-auto no-scrollbar pb-20 p-4 hidden">
+            <!-- Header with Back Button -->
+            <div class="flex items-center gap-2 mb-3">
+              <button onclick="navigateBack()" class="back-btn-tap w-8 h-8 rounded-full bg-white text-slate-700 shadow-sm flex items-center justify-center text-xs">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <h3 class="text-xs font-bold text-slate-800">Uttarakhand Bookings</h3>
+            </div>
+
+            <!-- Category Tabs -->
+            <div class="flex gap-2 mb-3" id="booking-filter-tabs">
+              <button onclick="filterBookings('stays', this)" class="px-3.5 py-1.5 rounded-full bg-gulabo text-white text-xs font-bold shadow-sm">Stays</button>
+              <button onclick="filterBookings('rides', this)" class="px-3.5 py-1.5 rounded-full bg-white text-slate-600 border border-slate-200 text-xs font-semibold">Rides</button>
+              <button onclick="filterBookings('activities', this)" class="px-3.5 py-1.5 rounded-full bg-white text-slate-600 border border-slate-200 text-xs font-semibold">Activities</button>
+            </div>
+
+            <!-- Stays Listings -->
+            <div class="space-y-3" id="booking-items-list">
+              <!-- Item 1 -->
+              <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
+                <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=400&q=80" alt="Ganga View" class="w-full h-28 object-cover" />
+                <div class="p-3">
+                  <div class="flex items-center justify-between">
+                    <h6 class="text-xs font-bold text-slate-900">Ganga View Boutique Stay</h6>
+                    <span class="text-xs font-bold text-purple-950">₹2,400 <span class="text-[9px] text-slate-400 font-normal">/रात</span></span>
+                  </div>
+                  <p class="text-[10px] text-slate-500 mt-0.5">Tapovan, Rishikesh • 1.2 km</p>
+                  <button onclick="openBookingModal('Ganga View Boutique Stay', '₹2,400')" class="w-full mt-2.5 py-2 rounded-xl bg-gulabo text-white font-bold text-xs shadow-sm">
+                    अभी बुक करें (Book Now)
+                  </button>
+                </div>
+              </div>
+
+              <!-- Item 2 -->
+              <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
+                <img src="https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=400&q=80" alt="Artisan Stay" class="w-full h-28 object-cover" />
+                <div class="p-3">
+                  <div class="flex items-center justify-between">
+                    <h6 class="text-xs font-bold text-slate-900">Artisan On The Ganges</h6>
+                    <span class="text-xs font-bold text-purple-950">₹1,850 <span class="text-[9px] text-slate-400 font-normal">/रात</span></span>
+                  </div>
+                  <p class="text-[10px] text-slate-500 mt-0.5">Laxman Jhula Road • 1.8 km</p>
+                  <button onclick="openBookingModal('Artisan On The Ganges', '₹1,850')" class="w-full mt-2.5 py-2 rounded-xl bg-gulabo text-white font-bold text-xs shadow-sm">
+                    अभी बुक करें (Book Now)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SCREEN 9: FOR BUSINESS (PARTNER WITH US) -->
+          <div id="s-9" class="screen-view h-full flex flex-col overflow-y-auto no-scrollbar pb-20 p-4 hidden">
+            <!-- Header with Back Button -->
+            <div class="flex items-center gap-2 mb-3">
+              <button onclick="navigateBack()" class="back-btn-tap w-8 h-8 rounded-full bg-white text-slate-700 shadow-sm flex items-center justify-center text-xs">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <h3 class="text-xs font-bold text-slate-800">VoxMap Partner Plus</h3>
+            </div>
+
+            <!-- Business Hero Banner -->
+            <div class="p-4 rounded-3xl bg-gradient-to-r from-purple-900 via-gulabo-deep to-indigo-900 text-white mb-4 shadow-lg">
+              <span class="text-[9px] font-bold bg-amber-400 text-purple-950 px-2 py-0.5 rounded-full uppercase">VoxMap Partner Plus</span>
+              <h3 class="text-base font-bold mt-1">Grow your business with Promoted Pins</h3>
+              <p class="text-[11px] text-purple-200 mt-0.5">Reach thousands of travelers exploring Uttarakhand every day.</p>
+            </div>
+
+            <!-- Business Features List -->
+            <div class="space-y-2.5 mb-5">
+              <div onclick="showAppNotification('प्रमोटेड पिन्स फीचर: मैप में पहले दिखें')" class="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3 cursor-pointer hover:border-purple-200">
+                <div class="w-10 h-10 rounded-xl bg-purple-50 text-gulabo flex items-center justify-center text-base">
+                  📍
+                </div>
+                <div>
+                  <h6 class="text-xs font-bold text-slate-900">Promoted Pins</h6>
+                  <p class="text-[10px] text-slate-500">Get priority ranking on map search</p>
+                </div>
+              </div>
+
+              <div onclick="showAppNotification('बिजनेस एनालिटिक्स डैशबोर्ड सक्रिय है')" class="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3 cursor-pointer hover:border-purple-200">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-base">
+                  📊
+                </div>
+                <div>
+                  <h6 class="text-xs font-bold text-slate-900">Business Dashboard</h6>
+                  <p class="text-[10px] text-slate-500">Track views, clicks & bookings</p>
+                </div>
+              </div>
+            </div>
+
+            <button onclick="openBusinessModal()" class="w-full py-3.5 rounded-2xl bg-gulabo text-white font-bold text-xs shadow-lg shadow-purple-950 active:scale-95 transition">
+              List Your Business / पार्टनर बनें &rarr;
+            </button>
+          </div>
+
+          <!-- SCREEN 10: CAFE DETAIL (LITTLE BUDDHA CAFE) -->
+          <div id="s-10" class="screen-view h-full flex flex-col overflow-y-auto no-scrollbar pb-20 bg-white hidden">
+            <!-- Hero Photo with Back Button -->
+            <div class="relative h-52">
+              <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=700&q=80" alt="Cafe" class="w-full h-full object-cover" />
+              <button onclick="navigateBack()" class="back-btn-tap absolute top-4 left-4 w-9 h-9 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center text-xs shadow-md">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+            </div>
+
+            <!-- Cafe Meta -->
+            <div class="p-4 -mt-4 bg-white rounded-t-3xl relative z-10">
+              <div class="flex items-center justify-between mb-1">
+                <h3 class="text-base font-bold text-slate-900">Little Buddha Cafe</h3>
+                <span class="text-xs font-bold text-amber-500 flex items-center gap-1">
+                  <i class="fa-solid fa-star"></i> 4.7 (540)
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-500 mb-2">Cafe • Rishikesh • Laxman Jhula • 300 m</p>
+
+              <div class="flex items-center gap-2 mb-3">
+                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">Open • Closes 10:00 PM</span>
+                <span class="text-[10px] font-semibold text-slate-500">₹₹ (Medium)</span>
+              </div>
+
+              <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+                Treetop cafe with great organic coffee, river view, and peaceful vibes. Perfect for evening relaxation after Ganga Aarti.
+              </p>
+
+              <!-- Actions (Call, Directions, Website) -->
+              <div class="grid grid-cols-3 gap-2 mb-4">
+                <button onclick="showAppNotification('कॉलिंग: +91 98234-XXXXX (Little Buddha Cafe)')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs font-semibold text-slate-700 flex flex-col items-center gap-1 hover:bg-slate-100">
+                  <i class="fa-solid fa-phone text-gulabo"></i> Call
+                </button>
+                <button onclick="navigateToScreen(3); selectMapSpot('Little Buddha Cafe', '300 m', 'रिवर व्यू ट्री-टॉप कैफे')" class="p-2.5 rounded-xl bg-purple-50 border border-purple-200 text-xs font-semibold text-gulabo flex flex-col items-center gap-1 hover:bg-purple-100">
+                  <i class="fa-solid fa-location-arrow"></i> Directions
+                </button>
+                <button onclick="showAppNotification('मेन्यू लोड हो रहा है: Pizzas, Organic Teas & Salads')" class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs font-semibold text-slate-700 flex flex-col items-center gap-1 hover:bg-slate-100">
+                  <i class="fa-solid fa-utensils text-gulabo"></i> Menu
+                </button>
+              </div>
+
+              <!-- Special Offer Badge (Claimable) -->
+              <div class="p-3 rounded-2xl bg-gradient-to-r from-purple-50 to-amber-50 border border-amber-200 flex items-center justify-between">
+                <div>
+                  <span class="text-[9px] font-extrabold text-amber-700 uppercase">VoxMap Special</span>
+                  <p class="text-xs font-bold text-purple-950 mt-0.5">10% OFF on all orders</p>
+                </div>
+                <button onclick="showAppNotification('कूपन कोड VXP10 क्लेम हो गया! 10% छूट लागू')" class="text-[10px] font-bold text-white bg-gulabo px-3 py-1.5 rounded-xl shadow-sm active:scale-95">
+                  Claim VXP10
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- SCREEN 11: AI VOICE GUIDE AUDIO PLAYER (DARK THEME) -->
+          <div id="s-11" class="screen-view h-full flex flex-col bg-slate-950 text-white p-5 justify-between relative overflow-hidden hidden">
+            <!-- Top Header with Back Button -->
+            <div class="flex items-center justify-between z-10">
+              <button onclick="navigateBack()" class="back-btn-tap w-9 h-9 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs shadow">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <span class="text-xs font-bold text-purple-300">AI Voice Guide</span>
+              <button onclick="showAppNotification('ऑडियो क्वालिटी: HD Lossless (128 kbps)')" class="w-9 h-9 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+              </button>
+            </div>
+
+            <!-- Glowing Concentric Audio Rings -->
+            <div class="flex flex-col items-center justify-center my-auto z-10 relative">
+              <div class="relative w-48 h-48 flex items-center justify-center">
+                <div class="pulse-ring-anim absolute inset-0 rounded-full border-2 border-purple-500/30"></div>
+                <div class="pulse-ring-anim absolute inset-4 rounded-full border-2 border-purple-400/50" style="animation-delay: 0.3s"></div>
+                <div class="w-32 h-32 rounded-full bg-gradient-to-tr from-purple-900 to-gulabo-deep flex flex-col items-center justify-center shadow-2xl border border-purple-400/40">
+                  <span class="text-[10px] text-purple-300 uppercase tracking-widest font-semibold" id="audio-status-label">Now Speaking</span>
+                  <i class="fa-solid fa-waveform text-xl text-amber-300 mt-1"></i>
+                </div>
+              </div>
+
+              <!-- Track Details -->
+              <h4 class="text-base font-bold text-white mt-4" id="audio-track-title">Kedarnath Temple</h4>
+              <p class="text-xs text-purple-300">Chapter 1 of 4 • 3,584m Altitude</p>
+            </div>
+
+            <!-- Scrubber & Controls -->
+            <div class="z-10 space-y-4">
+              <div>
+                <div onclick="seekAudio(event)" class="h-2 bg-slate-800 rounded-full overflow-hidden cursor-pointer">
+                  <div id="audio-progress-bar" class="h-full bg-gradient-to-r from-purple-500 to-amber-400 w-2/5 transition-all duration-300"></div>
+                </div>
+                <div class="flex justify-between text-[10px] text-slate-400 font-mono mt-1">
+                  <span id="audio-timer-current">01:42</span>
+                  <span>04:20</span>
+                </div>
+              </div>
+
+              <!-- Playback Action Buttons -->
+              <div class="flex items-center justify-center gap-6">
+                <button onclick="skipAudio(-10)" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-rotate-left"></i> 10s</button>
+                <button onclick="toggleAudioPlayback()" id="audio-play-btn" class="w-14 h-14 rounded-full bg-gulabo text-white flex items-center justify-center text-xl shadow-xl shadow-purple-950 active:scale-95 transition">
+                  <i class="fa-solid fa-pause"></i>
+                </button>
+                <button onclick="skipAudio(10)" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-rotate-right"></i> 10s</button>
+              </div>
+
+              <div class="flex items-center justify-between text-[10px] text-slate-400 pt-2 border-t border-slate-900">
+                <button onclick="togglePlaybackSpeed()" id="audio-speed-btn" class="hover:text-white font-semibold">Speed: <strong>1.0x</strong></button>
+                <span class="text-purple-300">Voice: <strong>Gulabo (Hindi AI)</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- SCREEN 12: PROFILE SCREEN (ACCURATE USER PROFILE) -->
+          <div id="s-12" class="screen-view h-full flex flex-col overflow-y-auto no-scrollbar pb-20 bg-[#F9F9FB] hidden">
+            <!-- Header with Back Button & Purple Gradient Curve -->
+            <div class="bg-gradient-to-r from-[#512086] to-[#6E28B2] text-white pt-4 pb-14 px-4 relative">
+              <div class="flex items-center justify-between mb-3">
+                <button onclick="navigateBack()" class="back-btn-tap w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center text-xs">
+                  <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <span class="text-xs font-bold text-purple-200">User Profile</span>
+                <button onclick="showAppNotification('प्रोफाइल सेटिंग्स')" class="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center text-xs">
+                  <i class="fa-solid fa-gear"></i>
+                </button>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <div class="w-14 h-14 rounded-full border-2 border-white/80 p-0.5 shadow-md flex-shrink-0">
+                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" alt="Amit Verma" class="w-full h-full object-cover rounded-full" />
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-bold text-base leading-tight">अमित वर्मा</h3>
+                  <p class="text-[11px] text-purple-200">amit.verma@gmail.com</p>
+                  <div class="mt-1 flex items-center gap-2">
+                    <span class="px-2 py-0.5 rounded-md bg-[#FDE8BB] text-[#9A6500] text-[9px] font-extrabold flex items-center gap-1 shadow-sm">
+                      <i class="fa-solid fa-crown text-[8px]"></i> प्रीमियम सदस्य
+                    </span>
+                  </div>
+                  <p class="text-[8px] text-purple-300 mt-1">पास वैध: 24 मई 2026</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Floating 4-Stat Box (Clickable) -->
+            <div class="px-4 -mt-8 relative z-10 mb-3">
+              <div class="bg-white rounded-2xl p-3 shadow-xl border border-slate-100 grid grid-cols-4 divide-x divide-slate-100 text-center">
+                <div onclick="showAppNotification('18 यात्राएं पूरी की गईं')" class="cursor-pointer">
+                  <span class="text-[9px] text-slate-500 font-medium">यात्राएं</span>
+                  <p class="text-sm font-bold text-slate-900 mt-0.5">18</p>
+                </div>
+                <div onclick="navigateToScreen(3); showAppNotification('56 पसंदीदा स्थान सेव हैं')" class="cursor-pointer">
+                  <span class="text-[9px] text-slate-500 font-medium">सेव किए</span>
+                  <p class="text-sm font-bold text-gulabo mt-0.5">56</p>
+                </div>
+                <div onclick="navigateToScreen(6)" class="cursor-pointer">
+                  <span class="text-[9px] text-slate-500 font-medium">क्विज़ स्कोर</span>
+                  <p class="text-sm font-bold text-slate-900 mt-0.5">2450</p>
+                </div>
+                <div onclick="showAppNotification('12 बैज: देवभूमि एक्सप्लोरर, केदारनाथ पाथफाइंडर')" class="cursor-pointer">
+                  <span class="text-[9px] text-slate-500 font-medium">बैज</span>
+                  <p class="text-sm font-bold text-amber-600 mt-0.5">12</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Profile Menu Items -->
+            <div class="px-4 space-y-1">
+              <div onclick="showAppNotification('आपका देवभूमि ऑल-एक्सेस पास एक्टिव है')" class="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-100 cursor-pointer hover:bg-slate-50">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-ticket text-slate-600 text-xs w-4"></i>
+                  <span class="text-xs font-medium text-slate-800">मेरे पास (VIP Pass)</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+              </div>
+
+              <div onclick="navigateToScreen(7)" class="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-100 cursor-pointer hover:bg-slate-50">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-download text-slate-600 text-xs w-4"></i>
+                  <span class="text-xs font-medium text-slate-800">मेरे डाउनलोड (Offline Maps)</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+              </div>
+
+              <div onclick="navigateToScreen(8)" class="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-100 cursor-pointer hover:bg-slate-50">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-calendar-check text-slate-600 text-xs w-4"></i>
+                  <span class="text-xs font-medium text-slate-800">मेरी बुकिंग (Stays & Cabs)</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+              </div>
+
+              <div onclick="navigateToScreen(4)" class="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-100 cursor-pointer hover:bg-slate-50">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-clock-rotate-left text-slate-600 text-xs w-4"></i>
+                  <span class="text-xs font-medium text-slate-800">AI चैट हिस्ट्री</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+              </div>
+
+              <div onclick="navigateToScreen(9)" class="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-100 cursor-pointer hover:bg-slate-50">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-store text-slate-600 text-xs w-4"></i>
+                  <span class="text-xs font-medium text-slate-800">बिजनेस मोड (Partner Plus)</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+              </div>
+
+              <div onclick="showAppNotification('भाषा: हिंदी (डिफ़ॉल्ट) चुनी गई है')" class="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-100 cursor-pointer hover:bg-slate-50">
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-globe text-slate-600 text-xs w-4"></i>
+                  <span class="text-xs font-medium text-slate-800">भाषा / Language</span>
+                </div>
+                <span class="text-[10px] text-slate-500 font-semibold">हिंदी &rarr;</span>
+              </div>
+
+              <div onclick="navigateToScreen(1)" class="flex items-center justify-between p-3 rounded-xl bg-rose-50 border border-rose-100 cursor-pointer hover:bg-rose-100/60 mt-3">
+                <div class="flex items-center gap-3 text-rose-700">
+                  <i class="fa-solid fa-arrow-right-from-bracket text-xs w-4"></i>
+                  <span class="text-xs font-bold">लॉग आउट करें (Logout)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Android Bottom Hardware Navigation & Gesture Pill -->
+        <div class="h-6 bg-white border-t border-slate-100 flex items-center justify-center relative select-none">
+          <div onclick="navigateBack()" class="w-24 h-1.5 bg-slate-400/80 rounded-full cursor-pointer hover:bg-purple-600 transition" title="Tap to Go Back"></div>
+        </div>
+
+        <!-- Persistent Bottom Navigation Bar -->
+        <nav id="phone-bottom-nav" class="relative h-[60px] bg-white border-t border-slate-200 flex items-center justify-around px-2 z-30 shadow-lg">
+          <button onclick="navigateToScreen(2)" class="nav-item flex flex-col items-center justify-center text-gulabo" data-screen="2">
+            <i class="fa-solid fa-house text-sm"></i>
+            <span class="text-[9px] font-bold mt-0.5">होम</span>
+          </button>
+          <button onclick="navigateToScreen(3)" class="nav-item flex flex-col items-center justify-center text-slate-400" data-screen="3">
+            <i class="fa-solid fa-map-location-dot text-sm"></i>
+            <span class="text-[9px] font-semibold mt-0.5">मैप</span>
+          </button>
+
+          <!-- Center Mic Hero Trigger -->
+          <div class="relative -top-3">
+            <button onclick="navigateToScreen(4)" class="w-12 h-12 rounded-full bg-gradient-to-tr from-[#512086] via-gulabo to-[#7B1FA2] text-white shadow-xl shadow-purple-900/50 flex items-center justify-center border-4 border-white active:scale-95 transition">
+              <i class="fa-solid fa-microphone text-base"></i>
+            </button>
+          </div>
+
+          <button onclick="navigateToScreen(8)" class="nav-item flex flex-col items-center justify-center text-slate-400" data-screen="8">
+            <i class="fa-solid fa-calendar-check text-sm"></i>
+            <span class="text-[9px] font-semibold mt-0.5">बुकिंग</span>
+          </button>
+          <button onclick="navigateToScreen(12)" class="nav-item flex flex-col items-center justify-center text-slate-400" data-screen="12">
+            <i class="fa-solid fa-user text-sm"></i>
+            <span class="text-[9px] font-semibold mt-0.5">प्रोफाइल</span>
+          </button>
+        </nav>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================================
+       VIEW MODE 2: FIGMA 12-SCREEN ARTBOARD CANVAS
+  ========================================================= -->
+  <main id="view-figma" class="flex-1 p-4 sm:p-8 overflow-y-auto hidden">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-palette text-amber-400"></i> Gulabo 12-Screen System Artboard
+          </h2>
+          <p class="text-xs text-slate-400">Click any artboard below to immediately open and test it inside the interactive phone simulator.</p>
+        </div>
+        <span class="text-xs px-3 py-1 rounded-full bg-purple-900/60 text-purple-200 border border-purple-500/40">
+          12 Artboards Synchronized
+        </span>
+      </div>
+
+      <!-- 12-Screen Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+
+        <!-- 1. Splash Screen -->
+        <div onclick="openScreenFromBoard(1)" class="board-card bg-slate-900 border border-slate-800 rounded-3xl p-3 cursor-pointer">
+          <div class="h-64 rounded-2xl overflow-hidden bg-slate-950 relative border border-slate-700/60 mb-2">
+            <img src="https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover opacity-70" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex flex-col justify-end p-3 text-center">
+              <span class="text-xs font-bold text-white font-['Noto_Sans_Devanagari']">यहाँ ज्ञान है, यहाँ शांति है...</span>
+              <button class="mt-2 py-1.5 rounded-xl bg-purple-700 text-white text-[10px] font-bold">Get Started</button>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-white">01. Onboarding</span>
+            <span class="text-[10px] text-slate-400">Kedarnath</span>
+          </div>
+        </div>
+
+        <!-- 2. Home Screen -->
+        <div onclick="openScreenFromBoard(2)" class="board-card bg-slate-900 border border-slate-800 rounded-3xl p-3 cursor-pointer">
+          <div class="h-64 rounded-2xl overflow-hidden bg-white p-2.5 relative border border-slate-200 text-slate-800 flex flex-col justify-between mb-2">
+            <div>
+              <div class="flex justify-between items-center text-[10px] font-bold text-purple-950 mb-2">
+                <span>📍 Rishikesh</span> <span>24°C</span>
+              </div>
+              <div class="p-2 rounded-xl bg-purple-700 text-white text-[10px] text-center mb-2">
+                Ask your AI Guide
+              </div>
+              <div class="grid grid-cols-4 gap-1 text-center text-[8px] font-bold">
+                <span class="p-1 bg-purple-50 rounded">🛕 Temples</span>
+                <span class="p-1 bg-purple-50 rounded">🏔️ Viewpoint</span>
+                <span class="p-1 bg-purple-50 rounded">🌊 Falls</span>
+                <span class="p-1 bg-purple-50 rounded">☕ Cafes</span>
+              </div>
+            </div>
+            <div class="p-2 bg-indigo-50 rounded-xl text-[9px] font-bold text-indigo-950">
+              Quiz & Knowledge Banner
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-white">02. Home Explore</span>
+            <span class="text-[10px] text-slate-400">Rishikesh</span>
+          </div>
+        </div>
+
+        <!-- 3. Maps & POIs -->
+        <div onclick="openScreenFromBoard(3)" class="board-card bg-slate-900 border border-slate-800 rounded-3xl p-3 cursor-pointer">
+          <div class="h-64 rounded-2xl overflow-hidden bg-[#E8F1F5] p-2 relative border border-slate-300 flex flex-col justify-between mb-2">
+            <div class="p-1.5 bg-white rounded-lg text-[9px] text-slate-500 shadow-sm">ऋषिकेश में स्थान खोजें...</div>
+            <div class="flex justify-around items-center">
+              <span class="p-1 bg-purple-700 text-white rounded-full text-[9px]">🛕</span>
+              <span class="p-1 bg-rose-600 text-white rounded-full text-[9px]">📍</span>
+              <span class="p-1 bg-purple-700 text-white rounded-full text-[9px]">🌉</span>
+            </div>
+            <div class="p-2 bg-white rounded-xl text-[9px] font-bold text-slate-800 shadow">
+              Triveni Ghat (800m away)
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-white">03. Maps Navigation</span>
+            <span class="text-[10px] text-slate-400">Ganga POIs</span>
+          </div>
+        </div>
+
+        <!-- 4. AI Guide Chat -->
+        <div onclick="openScreenFromBoard(4)" class="board-card bg-slate-900 border border-slate-800 rounded-3xl p-3 cursor-pointer">
+          <div class="h-64 rounded-2xl overflow-hidden bg-white p-2.5 relative border border-slate-200 text-slate-800 flex flex-col justify-between mb-2">
+            <div class="text-[9px] font-bold text-purple-900 border-b pb-1">Gulabo AI Guide</div>
+            <div class="space-y-1.5 text-[8px]">
+              <div class="bg-purple-700 text-white p-1.5 rounded-lg text-right">त्रिवेणी घाट का इतिहास क्या है?</div>
+              <div class="bg-purple-50 p-1.5 rounded-lg text-slate-700">यहाँ गंगा, यमुना और सरस्वती का संगम है...</div>
+              <div class="bg-purple-700 text-white p-1.5 rounded-lg text-right">आरती का समय क्या है?</div>
+            </div>
+            <div class="p-1.5 bg-purple-50 rounded-lg text-[9px] text-slate-400">गुलाबो से पूछें...</div>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-white">04. AI Guide Chat</span>
+            <span class="text-[10px] text-slate-400">Bilingual</span>
+          </div>
+        </div>
+
+        <!-- 5. Place Detail -->
+        <div onclick="openScreenFromBoard(5)" class="board-card bg-slate-900 border border-slate-800 rounded-3xl p-3 cursor-pointer">
+          <div class="h-64 rounded-2xl overflow-hidden bg-white relative border border-slate-200 text-slate-800 flex flex-col mb-2">
+            <img src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=300&q=80" class="h-28 w-full object-cover" />
+            <div class="p-2 flex-1 flex flex-col justify-between">
+              <div>
+                <h6 class="text-[10px] font-bold">Triveni Ghat (4.8 ★)</h6>
+                <p class="text-[8px] text-slate-500 mt-0.5">800m • Mayakund, Rishikesh</p>
+              </div>
+              <button class="py-1 bg-purple-700 text-white rounded-lg text-[9px] font-bold">दिशा-निर्देश देखें</button>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-white">05. Place Detail</span>
+            <span class="text-[10px] text-slate-400">Triveni Ghat</span>
+          </div>
+        </div>
+
+        <!-- 6. Quizzes -->
+        <div onclick="openScreenFromBoard(6)" class="board-card bg-slate-900 border border-slate-800 rounded-3xl p-3 cursor-pointer">
+          <div class="h-64 rounded-2xl overflow-hidden bg-white p-2.5 relative border border-slate-200 text-slate-800 flex flex-col justify-between mb-2">
+            <div class="p-2 bg-indigo-700 text-white rounded-xl text-[9px] font-bold">
+              उत्तराखंड दैनिक ज्ञान क्विज़ (540 🪙)
+            </div>
+            <div class="space-y-1">
+              <div class="p-1.5 bg-slate-50 rounded text-[8px] font-bold">GK Quizzes (50+)</div>
+              <div class="p-1.5 bg-slate-50 rounded text-[8px] font-bold">History (30+)</div>
+            </div>
+            <button class="py-1 bg-purple-700 text-white rounded-lg text-[9px] font-bold">Start Quiz</button>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-white">06. Quizzes Screen</span>
+            <span class="text-[10px] text-slate-400">Rewards</span>
+          </div>
+        </div>
+
+        <!-- 7. Offline Pack -->
+        <div onclick="openScreenFromBoard(7)" class="board-card bg-slate-900 border border-slate-800 rounded-3xl p-3 cursor-pointer">
+          <div class="h-64 rounded-2xl overflow-hidden bg-white p-2.5 relative border border-slate-200 text-slate-800 flex flex-col justify-between mb-2">
+            <div class="p-2 bg-teal-700 text-white rounded-xl text-[9px] font-bold">
+              इंटरनेट के बिना भी घूमें!
+            </div>
+            <div class="space-y-1.5 text-[8px]">
+              <div class="p-1.5 border rounded flex justify-between"><span>Rishikesh (85MB)</span> <span>⬇️</span></div>
+              <div class="p-1.5 border rounded flex justify-between"><span>Kedarnath (120MB)</span> <span>⬇️</span></div>
+            </div>
+            <span class="text-[8px] text-slate-400">Offline GPS Available</span>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-white">07. Offline Pack</span>
+            <span class="text-[10px] text-slate-400">Downloads</span>
+          </div>
+        </div>
+
+        <!-- 8. Bookings -->
+        <div onclick="openScreenFromBoard(8)" class="board-card bg-slate-900 border border-slate-800 rounded-3xl p-3 cursor-pointer">
+          <div class="h-64 rounded-2xl overflow-hidden bg-white p-2.5 relative border border-slate-200 text-slate-800 flex flex-col justify-between mb-2">
+            <div class="flex gap-1 text-[8px] font-bold">
+              <span class="p-1 bg-purple-700 text-white rounded">Stays</span>
+              <span class="p-1 bg-slate-100 rounded">Rides</span>
+              <span class="p-1 bg-slate-100 rounded">Activities</span>
+            </div>
+            <div class="p-1.5 border rounded-lg text-[8px]">
+              <strong>Ganga View Boutique</strong><br />₹2,400/रात
+            </div>
+            <div class="p-1.5 border rounded-lg text-[8px]">
+              <strong>Artisan Stay</strong><br />₹1,850/रात
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-white">08. Bookings & Stays</span>
+            <span class="text-[10px] text-slate-400">Homestays</span>
+          </div>
+        </div>
+
+        <!-- 9. For Business -->
+        <div onclick="openScreenFromBoard(9)" class="board-card bg-slate-900 border border-slate-800 rounded-3xl p-3 cursor-pointer">
+          <div class="h-64 rounded-2xl overflow-hidden bg-white p-2.5 relative border border-slate-200 text-slate-800 flex flex-col justify-between mb-2">
+            <div class="p-2 bg-gradient-to-r from-purple-900 to-indigo-900 text-white rounded-xl text-[9px] font-bold">
+              Grow your business with Promoted Pins
+            </div>
+            <div class="space-y-1 text-[8px]">
+              <div>📍 Promoted Pins</div>
+              <div>📊 Dashboard & Clicks</div>
+              <div>🪙 Payouts & Earnings</div>
+            </div>
+            <button class="py-1 bg-purple-700 text-white rounded-lg text-[9px] font-bold">List Business</button>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-white">09. For Business</span>
+            <span class="text-[10px] text-slate-400">Partners</span>
+          </div>
+        </div>
+
+        <!-- 10. Cafe Detail -->
+        <div onclick="openScreenFromBoard(10)" class="board-card bg-slate-900 border border-slate-800 rounded-3xl p-3 cursor-pointer">
+          <div class="h-64 rounded-2xl overflow-hidden bg-white relative border border-slate-200 text-slate-800 flex flex-col mb-2">
+            <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=300&q=80" class="h-28 w-full object-cover" />
+            <div class="p-2 flex-1 flex flex-col justify-between text-[9px]">
+              <div>
+                <strong>Little Buddha Cafe (4.7 ★)</strong>
+                <p class="text-slate-500 text-[8px]">Open • Closes 10 PM</p>
+              </div>
+              <div class="p-1 bg-amber-50 rounded text-amber-800 font-bold text-[8px]">
+                10% OFF with code VXP10
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-white">10. Cafe Detail</span>
+            <span class="text-[10px] text-slate-400">Little Buddha</span>
+          </div>
+        </div>
+
+        <!-- 11. AI Voice Audio Player -->
+        <div onclick="openScreenFromBoard(11)" class="board-card bg-slate-900 border border-slate-800 rounded-3xl p-3 cursor-pointer">
+          <div class="h-64 rounded-2xl overflow-hidden bg-slate-950 p-2.5 relative border border-purple-500/40 text-white flex flex-col justify-between items-center text-center mb-2">
+            <span class="text-[8px] text-purple-300">AI Voice Guide</span>
+            <div class="w-16 h-16 rounded-full border-2 border-purple-400 flex items-center justify-center text-xs">
+              🎙️
+            </div>
+            <div>
+              <strong class="text-[10px] block">Kedarnath Temple</strong>
+              <span class="text-[8px] text-purple-300">Chapter 1 of 4</span>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-purple-700 flex items-center justify-center text-xs">▶</div>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-white">11. AI Voice Player</span>
+            <span class="text-[10px] text-slate-400">Dark AMOLED</span>
+          </div>
+        </div>
+
+        <!-- 12. Profile Screen -->
+        <div onclick="openScreenFromBoard(12)" class="board-card bg-slate-900 border border-slate-800 rounded-3xl p-3 cursor-pointer">
+          <div class="h-64 rounded-2xl overflow-hidden bg-[#F9F9FB] relative border border-slate-200 text-slate-800 flex flex-col justify-between mb-2">
+            <div class="p-2.5 bg-gradient-to-r from-purple-800 to-indigo-800 text-white text-[9px]">
+              <strong>अमित वर्मा</strong><br />amit.verma@gmail.com
+            </div>
+            <div class="grid grid-cols-4 gap-1 p-1 bg-white text-center text-[7px] font-bold border-y">
+              <span>18<br />यात्राएं</span>
+              <span>56<br />सेव</span>
+              <span>2450<br />स्कोर</span>
+              <span>12<br />बैज</span>
+            </div>
+            <div class="p-2 space-y-1 text-[8px]">
+              <div>🎟️ मेरे पास</div>
+              <div>📥 डाउनलोड</div>
+              <div>📍 सेव किए स्थान</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-white">12. Profile Screen</span>
+            <span class="text-[10px] text-slate-400">Amit Verma</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer Info Bar -->
+  <footer class="w-full text-center py-2 text-[11px] text-slate-500 bg-slate-950 border-t border-slate-900">
+    Gulabo / VoxMap Navigation Stack & Micro-Interactions Engine • Uttarakhand AI Companion
+  </footer>
+
+  <!-- ========================================================
+       JAVASCRIPT: INTERACTIVITY, BACK STACK & AUDIO SYSTEM
+  ========================================================= -->
+  <script>
+    // Navigation History Stack
+    let navHistory = [2]; // Default starts at Screen 2 (Home)
+    let currentScreen = 2;
+
+    // Audio Playback Simulated State
+    let isAudioPlaying = true;
+    let audioCurrentSeconds = 102; // 01:42
+    let audioDuration = 260; // 04:20
+    let audioSpeed = 1.0;
+    let audioInterval = null;
+
+    // User Coins state
+    let userCoins = 2450;
+    let isBookmarked = false;
+
+    // Clock update
+    function updatePhoneClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      let minutes = now.getMinutes();
+      minutes = minutes < 10 ? '0' + minutes : minutes;
+      hours = hours < 10 ? '0' + hours : hours;
+      const el = document.getElementById('phone-clock');
+      if (el) el.innerText = `${hours}:${minutes}`;
+    }
+
+    // Master Navigation Function with History Stack
+    function navigateToScreen(screenNum, isBackAction = false) {
+      screenNum = parseInt(screenNum);
+
+      if (!isBackAction) {
+        if (navHistory[navHistory.length - 1] !== screenNum) {
+          navHistory.push(screenNum);
+        }
+      }
+
+      currentScreen = screenNum;
+
+      // Hide all screens
+      document.querySelectorAll('.screen-view').forEach(s => s.classList.add('hidden'));
+
+      // Show targeted screen
+      const target = document.getElementById(`s-${screenNum}`);
+      if (target) {
+        target.classList.remove('hidden');
+        target.scrollTop = 0;
+      }
+
+      // Sync Top Status Bar and Bottom Nav
+      const topBar = document.getElementById('phone-top-bar');
+      const bottomNav = document.getElementById('phone-bottom-nav');
+
+      if (screenNum === 1 || screenNum === 11) {
+        // Dark theme screens (Kedarnath Splash & AMOLED Player)
+        topBar.className = "h-11 px-7 pt-2 flex items-center justify-between text-xs font-semibold z-40 bg-slate-950 text-white select-none border-b border-white/5 transition-colors duration-200";
+        if (screenNum === 1) bottomNav.classList.add('hidden');
+        else bottomNav.classList.remove('hidden');
+      } else {
+        // Light theme screens
+        topBar.className = "h-11 px-7 pt-2 flex items-center justify-between text-xs font-semibold z-40 bg-white text-slate-800 select-none border-b border-slate-100 transition-colors duration-200";
+        bottomNav.classList.remove('hidden');
+      }
+
+      // Update active bottom navigation state
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        const scr = parseInt(btn.getAttribute('data-screen'));
+        if (scr === screenNum) {
+          btn.className = "nav-item flex flex-col items-center justify-center text-gulabo font-bold";
+        } else {
+          btn.className = "nav-item flex flex-col items-center justify-center text-slate-400 font-semibold";
+        }
+      });
+
+      // Sync Top Dropdown
+      const sel = document.getElementById('quick-screen-select');
+      if (sel) sel.value = screenNum.toString();
+    }
+
+    // Global Back Button Handler
+    function navigateBack() {
+      if (navHistory.length > 1) {
+        navHistory.pop(); // Remove current screen
+        const prevScreen = navHistory[navHistory.length - 1];
+        navigateToScreen(prevScreen, true);
+        showAppNotification(`&larr; वापस जा रहे हैं`);
+      } else {
+        navigateToScreen(2, true); // Fallback to Home
+      }
+    }
+
+    function jumpToScreen(val) {
+      setViewMode('phone');
+      navigateToScreen(val);
+    }
+
+    function openScreenFromBoard(idx) {
+      setViewMode('phone');
+      navigateToScreen(idx);
+      showAppNotification(`स्क्रीन ${idx} लोड हुई`);
+    }
+
+    function setViewMode(mode) {
+      const viewPhone = document.getElementById('view-phone');
+      const viewFigma = document.getElementById('view-figma');
+      const btnPhone = document.getElementById('btn-mode-phone');
+      const btnFigma = document.getElementById('btn-mode-figma');
+
+      if (mode === 'phone') {
+        viewPhone.classList.remove('hidden');
+        viewFigma.classList.add('hidden');
+        btnPhone.className = "px-3.5 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 bg-gulabo text-white shadow";
+        btnFigma.className = "px-3.5 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white";
+      } else {
+        viewPhone.classList.add('hidden');
+        viewFigma.classList.remove('hidden');
+        btnFigma.className = "px-3.5 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 bg-gulabo text-white shadow";
+        btnPhone.className = "px-3.5 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 text-slate-300 hover:text-white";
+      }
+    }
+
+    // Interactive Toast Notification
+    function showAppNotification(msg) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = "pointer-events-auto bg-slate-900/95 border border-purple-500/60 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-xs flex items-center gap-2.5 transition duration-300 transform translate-y-0";
+      toast.innerHTML = `
+        <div class="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center text-[10px]">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <span class="font-medium">${msg}</span>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 2400);
+    }
+
+    // Modal Control
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('hidden');
+    }
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    }
+
+    // Booking Flow
+    function openBookingModal(title, price) {
+      document.getElementById('booking-modal-title').innerText = title;
+      document.getElementById('booking-modal-price').innerText = `${price} / रात • 2 यात्री`;
+      openModal('booking-modal');
+    }
+    function confirmBooking() {
+      closeModal('booking-modal');
+      showAppNotification('🎉 बुकिंग सफल! वाउचर और लोकेशन WhatsApp पर भेज दी गई है।');
+    }
+
+    // Business Partner Lead Form
+    function openBusinessModal() {
+      openModal('business-modal');
+    }
+    function submitBusinessListing() {
+      const name = document.getElementById('biz-name').value.trim() || 'व्यवसाय';
+      closeModal('business-modal');
+      showAppNotification(`✅ धन्यवाद! ${name} का आवेदन प्राप्त हुआ। VoxMap टीम 2 घंटे में संपर्क करेगी।`);
+    }
+
+    // Map Interactivity
+    function selectMapSpot(name, dist, desc) {
+      document.getElementById('map-card-title').innerText = name;
+      document.getElementById('map-card-dist').innerText = `${dist} away • ${desc}`;
+      showAppNotification(`📍 चयनित: ${name} (${dist})`);
+    }
+    function startNavigationToCurrentPOI() {
+      const name = document.getElementById('map-card-title').innerText;
+      showAppNotification(`🚀 नेविगेशन शुरू: ${name} की ओर लाइव रूट बन गया है (800m, 4 मिनट)`);
+    }
+    function filterMapPOI() {
+      showAppNotification('फ़िल्टर सक्रिय: केवल टॉप-रेटेड व खुले स्थल दिखाए जा रहे हैं');
+    }
+
+    // Chat Functions
+    function sendUserMessage() {
+      const input = document.getElementById('chat-input-field');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      const container = document.getElementById('chat-messages-container');
+      
+      // User Message Bubble
+      const userBubble = document.createElement('div');
+      userBubble.className = "flex justify-end";
+      userBubble.innerHTML = `
+        <div class="bg-gradient-to-r from-purple-700 to-gulabo text-white p-3 rounded-2xl rounded-tr-none text-xs max-w-[85%] shadow-sm">
+          ${msg}
+        </div>
+      `;
+      container.appendChild(userBubble);
+      input.value = "";
+      container.scrollTop = container.scrollHeight;
+
+      // Simulated AI Reply
+      setTimeout(() => {
+        const gulaboBubble = document.createElement('div');
+        gulaboBubble.className = "flex items-start gap-2";
+        gulaboBubble.innerHTML = `
+          <div class="w-7 h-7 rounded-full bg-purple-100 text-gulabo flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+            🌺
+          </div>
+          <div class="bg-purple-50 border border-purple-100 p-3 rounded-2xl rounded-tl-none text-xs text-slate-800 max-w-[85%] leading-relaxed">
+            यह ऋषिकेश का एक बेहद खास स्थान है। क्या आप यहाँ का लाइव नेविगेशन रूट या नजदीकी गाइड विवरण देखना चाहते हैं?
+            <div class="mt-2 flex gap-1.5">
+              <button onclick="navigateToScreen(3)" class="px-2.5 py-1 rounded-xl bg-gulabo text-white text-[10px] font-bold">
+                मैप पर देखें &rarr;
+              </button>
+            </div>
+          </div>
+        `;
+        container.appendChild(gulaboBubble);
+        container.scrollTop = container.scrollHeight;
+        speakDemoHindi("यह ऋषिकेश का एक बेहद खास स्थान है। क्या आप यहाँ का लाइव नेविगेशन रूट देखना चाहते हैं?");
+      }, 500);
+    }
+
+    function sendQuickPrompt(promptText) {
+      document.getElementById('chat-input-field').value = promptText;
+      sendUserMessage();
+    }
+
+    // Web Speech API Voice
+    function speakDemoHindi(customText) {
+      const text = customText || "त्रिवेणी घाट ऋषिकेश का सबसे पावन और बड़ा घाट है। यहाँ गंगा, यमुना और सरस्वती नदियों का संगम माना जाता है।";
+      showAppNotification("🔊 गुलाबो AI ऑडियो बोल रही है...");
+
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.95;
+        utterance.pitch = 1.15;
+        utterance.lang = 'hi-IN';
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // Quizzes: Interactive Options
+    function answerQuiz(btnElement, isCorrect) {
+      const allBtns = document.getElementById('quiz-options-group').querySelectorAll('button');
+      allBtns.forEach(b => {
+        b.disabled = true;
+        b.className = "w-full text-left p-2.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-400 bg-slate-50";
+      });
+
+      if (isCorrect) {
+        btnElement.className = "w-full text-left p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-900 text-xs font-bold";
+        userCoins += 50;
+        document.getElementById('quiz-user-coins').innerText = `🪙 ${userCoins.toLocaleString()} Coins`;
+        showAppNotification('🎉 बिल्कुल सही उत्तर! +50 कॉइन्स आपके खाते में जुड़े।');
+      } else {
+        btnElement.className = "w-full text-left p-2.5 rounded-xl border-2 border-rose-500 bg-rose-50 text-rose-900 text-xs font-bold";
+        showAppNotification('गलत उत्तर! सही उत्तर था: (A) गंगा, यमुना और सरस्वती।');
+      }
+    }
+
+    // Offline Pack Simulator with Download Bar
+    function downloadOfflinePack(packId, packName) {
+      const btn = document.getElementById(`pack-btn-${packId}`);
+      if (!btn) return;
+
+      btn.disabled = true;
+      let progress = 0;
+      btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> 0%`;
+
+      const interval = setInterval(() => {
+        progress += 25;
+        btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> ${progress}%`;
+        if (progress >= 100) {
+          clearInterval(interval);
+          btn.className = "px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center gap-1";
+          btn.innerHTML = `<i class="fa-solid fa-check"></i> Downloaded`;
+          showAppNotification(`✅ ${packName} ऑफलाइन डाउनलोड हो गया! अब बिना इंटरनेट मैप चलेगा।`);
+        }
+      }, 300);
+    }
+
+    // Booking Category Filter Tabs
+    function filterBookings(cat, btn) {
+      const tabs = document.getElementById('booking-filter-tabs').querySelectorAll('button');
+      tabs.forEach(t => {
+        t.className = "px-3.5 py-1.5 rounded-full bg-white text-slate-600 border border-slate-200 text-xs font-semibold";
+      });
+      btn.className = "px-3.5 py-1.5 rounded-full bg-gulabo text-white text-xs font-bold shadow-sm";
+      showAppNotification(`फ़िल्टर लागू: ${cat.toUpperCase()}`);
+    }
+
+    // Bookmark Toggle
+    function toggleBookmark() {
+      const btn = document.getElementById('bookmark-btn');
+      isBookmarked = !isBookmarked;
+      if (isBookmarked) {
+        btn.innerHTML = `<i class="fa-solid fa-heart text-rose-500"></i>`;
+        showAppNotification('❤️ त्रिवेणी घाट आपके पसंदीदा स्थानों में सुरक्षित हो गया!');
+      } else {
+        btn.innerHTML = `<i class="fa-regular fa-heart"></i>`;
+        showAppNotification('स्थान पसंदीदा सूची से हटाया गया');
+      }
+    }
+
+    function shareCurrentPlace(placeName) {
+      showAppNotification(`🔗 ${placeName} का लिंक क्लिपबोर्ड में कॉपी हो गया`);
+    }
+
+    // Audio Player Engine
+    function formatTime(secs) {
+      const m = Math.floor(secs / 60);
+      const s = Math.floor(secs % 60);
+      return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function updateAudioProgress() {
+      if (isAudioPlaying && audioCurrentSeconds < audioDuration) {
+        audioCurrentSeconds += 1;
+        const pct = (audioCurrentSeconds / audioDuration) * 100;
+        document.getElementById('audio-progress-bar').style.width = `${pct}%`;
+        document.getElementById('audio-timer-current').innerText = formatTime(audioCurrentSeconds);
+      }
+    }
+
+    function toggleAudioPlayback() {
+      isAudioPlaying = !isAudioPlaying;
+      const btn = document.getElementById('audio-play-btn');
+      const label = document.getElementById('audio-status-label');
+      if (isAudioPlaying) {
+        btn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+        label.innerText = "Now Speaking";
+        showAppNotification("▶️ ऑडियो प्ले हो रहा है");
+      } else {
+        btn.innerHTML = `<i class="fa-solid fa-play ml-1"></i>`;
+        label.innerText = "Paused";
+        showAppNotification("⏸️ ऑडियो पॉज किया गया");
+      }
+    }
+
+    function skipAudio(seconds) {
+      audioCurrentSeconds = Math.max(0, Math.min(audioDuration, audioCurrentSeconds + seconds));
+      const pct = (audioCurrentSeconds / audioDuration) * 100;
+      document.getElementById('audio-progress-bar').style.width = `${pct}%`;
+      document.getElementById('audio-timer-current').innerText = formatTime(audioCurrentSeconds);
+    }
+
+    function seekAudio(event) {
+      const bar = event.currentTarget;
+      const rect = bar.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const ratio = clickX / rect.width;
+      audioCurrentSeconds = Math.floor(audioDuration * ratio);
+      document.getElementById('audio-progress-bar').style.width = `${ratio * 100}%`;
+      document.getElementById('audio-timer-current').innerText = formatTime(audioCurrentSeconds);
+    }
+
+    function togglePlaybackSpeed() {
+      if (audioSpeed === 1.0) audioSpeed = 1.25;
+      else if (audioSpeed === 1.25) audioSpeed = 1.5;
+      else audioSpeed = 1.0;
+      document.getElementById('audio-speed-btn').innerHTML = `Speed: <strong>${audioSpeed}x</strong>`;
+      showAppNotification(`स्पीड: ${audioSpeed}x`);
+    }
+
+    // App Initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      updatePhoneClock();
+      setInterval(updatePhoneClock, 30000);
+      audioInterval = setInterval(updateAudioProgress, 1000);
+      navigateToScreen(2); // Start on Home Screen
+    });
+  </script>
+</body>
+</html>
